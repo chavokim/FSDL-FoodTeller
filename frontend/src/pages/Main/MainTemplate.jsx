@@ -1,14 +1,19 @@
 import React, {useRef, useState} from "react";
 import {Box, Stack, Typography} from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
+import {LoadingOverlay} from "../../common/LoadingOverlay";
+import {useNavigate} from "react-router-dom";
 
 export const MainTemplate = () => {
     const [file, setFile] = useState();
+    const [loading, setLoading] = useState(false);
     const fileInputRef = useRef();
     const fileBoxRef = useRef();
     
+    const navigate = useNavigate();
+    
     const onFileChange = (event) => {
-        setFile(event.target.files[0])
+        uploadFile(event.target.files[0]);
     }
     
     const onFileUpload = () => {
@@ -36,11 +41,19 @@ export const MainTemplate = () => {
     const handleDrop = e => {
         e.preventDefault();
         
-        console.log("drop")
-        console.log(e.dataTransfer.files[0]);
+        uploadFile(e.dataTransfer.files[0]);
         
         fileBoxRef.current.style.backgroundColor = "initial";
         fileBoxRef.current.style.opacity = 1;
+    }
+    
+    const uploadFile = newFile => {
+        setFile(newFile);
+        setLoading(true);
+        setTimeout(() => {
+            navigate("/output");
+            setLoading(false);
+        }, 1000);
     }
     
     return (
@@ -50,6 +63,9 @@ export const MainTemplate = () => {
             spacing={5}
             alignItems={"center"}
         >
+            <LoadingOverlay 
+                active={loading}
+            />
             <Typography
                 variant={"h2"}
             >
