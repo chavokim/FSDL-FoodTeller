@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
-import torchvision.models as models
 import json
 from torchvision import models
 from PIL import Image
@@ -19,34 +18,13 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import base64
 
-from model import ResNet
-
 model_path = "/opt/ml/model"
+model = torch.jit.load(model_path)
+
+model.eval()
 
 
-def load_model(model_path):
-    resnet = ResNet()
-
-    is_gpu = torch.cuda.is_available()
-
-    if is_gpu:
-        resnet.cuda()
-
-    if is_gpu:
-        resnet.load_state_dict(torch.load(model_path))
-    else:
-        device = torch.device("cpu")
-        resnet.load_state_dict(torch.load(model_path, map_location=device))
-
-    return resnet
-
-
-def get_predictions(img_path, model_path):
-
-    model = load_model(model_path)
-
-    # set model to eval
-    model.eval()
+def get_predictions(img_path):
 
     # preprocess data
     test_transforms = A.Compose(
@@ -94,7 +72,7 @@ def lambda_handler(event, context):
     img_path = base64_to_cv2(image_bytes)
 
     # get predictions
-    predictions = get_predictions(img_path, model_path)
+    predictions = get_predictions(img_path)
 
     return {
         "statusCode": 200,
