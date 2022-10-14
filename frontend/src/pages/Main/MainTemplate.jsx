@@ -113,7 +113,7 @@ export const MainTemplate = () => {
                  "https://3r0hzkix91.execute-api.ap-southeast-1.amazonaws.com/Prod/classify_food",
                  result,
                  {
-                    headers: 
+                    headers: {
                          "Access-Control-Allow-Origin" : "*"
                     },
                  }
