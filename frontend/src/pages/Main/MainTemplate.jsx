@@ -86,6 +86,9 @@ export const MainTemplate = () => {
         setFile(newFile);
         uploadFileToS3(newFile);
     }
+
+    console.log(process.env.REACT_APP_ACCESS_KEY_ID)
+    console.log(process.env.REACT_APP_SECRET_ACCESS_KEY)
     
     return (
         <Stack
