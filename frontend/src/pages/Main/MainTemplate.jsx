@@ -1,8 +1,7 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {Box, Stack, Typography, useMediaQuery} from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import {LoadingOverlay} from "../../common/LoadingOverlay";
-import {useNavigate, useSearchParams} from "react-router-dom";
 import AWS from 'aws-sdk'
 import axios from "axios";
 
@@ -103,7 +102,7 @@ export const MainTemplate = () => {
 
     const getPrediction = (newFile) => {
          getBase64(newFile).then(async result => {
-             const response = await axios.post(
+             await axios.post(
                  "/Prod/classify_food",
                  result,
                  {
@@ -136,7 +135,6 @@ export const MainTemplate = () => {
             />
             <Stack
                 direction={{md: "row", sm:"column"}}
-                spacing={5}
                 width={"100%"}
                 height={"100%"}
             >
@@ -195,8 +193,10 @@ export const MainTemplate = () => {
                     spacing={5}
                     alignItems={"center"}
                     flexGrow={1}
+                    justifyContent={"center"}
                     sx={{
                         mx: 5,
+                        my: 5,
                     }}
                 >
                     <Typography
