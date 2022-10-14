@@ -196,7 +196,10 @@ export const MainTemplate = () => {
                                 If upper result is incorrect, click below button
                             </Typography>
                             <Button
-                                onClick={() => uploadFileToS3(file, true)}
+                                onClick={() => {
+                                    uploadFileToS3(file, true);
+                                    setPrediction(null);
+                                }}
                                 variant={"contained"}
                                 color={"error"}
                             >
