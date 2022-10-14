@@ -21,19 +21,13 @@ const myBucket = new AWS.S3({
 })
 
 export const MainTemplate = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [prediction, setPrediction] = useState();
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef();
     const fileBoxRef = useRef();
 
     const mdBreakpoints = useMediaQuery(theme => theme.breakpoints.up("md"));
-
-    useEffect(() => {
-        console.log(searchParams);
-    }, [searchParams])
-    
-    const navigate = useNavigate();
-    
+        
     const onFileChange = (event) => {
         uploadFile(event.target.files[0]);
     }
@@ -101,7 +95,7 @@ export const MainTemplate = () => {
             console.log("Called", reader);
             baseURL = reader.result;
             console.log(baseURL);
-            resolve(baseURL);
+            resolve(baseURL.split("base64,")[1]);
           };
           console.log(fileInfo);
         });
@@ -110,15 +104,17 @@ export const MainTemplate = () => {
     const getPrediction = (newFile) => {
          getBase64(newFile).then(async result => {
              const response = await axios.post(
-                 "https://3r0hzkix91.execute-api.ap-southeast-1.amazonaws.com/Prod/classify_food",
+                 "/Prod/classify_food",
                  result,
                  {
+                    baseURL: "https://oqvmaayszek7blcwg6kl325dqe0fnxxh.lambda-url.ap-southeast-1.on.aws",
                     headers: {
-                         "Access-Control-Allow-Origin" : "*"
+                         "Content-Type" : "text/plain",
                     },
                  }
              ).then(resp => {
-                 setSearchParams({food: "hi", ingredients: ["h", "tomo", "potato"]});
+                 setPrediction(resp.data.prediction);
+                 setLoading(false);
              })
          })
     }
@@ -133,63 +129,126 @@ export const MainTemplate = () => {
         <Stack
             height={"100vh"}
             justifyContent={"center"}
-            spacing={5}
             alignItems={"center"}
         >
             <LoadingOverlay 
                 active={loading}
             />
-            <Typography
-                variant={mdBreakpoints ? "h2" : "h4"}
+            <Stack
+                direction={{md: "row", sm:"column"}}
+                spacing={5}
+                width={"100%"}
+                height={"100%"}
             >
-                FSDL Food-telling
-            </Typography>
-            <Box
-                width={900}
-            >
+                {
+                    prediction ? (
+                        <Stack
+                            spacing={2.5}
+                            alignItems={"center"}
+                            sx={{
+                                mx: {md: 5, xs: 2.5,},
+                                my: {md: 5, xs: 2.5,}
+                            }}
+                        >
+                            <Typography
+                                variant={mdBreakpoints ? "h4" : "h6"}
+                            >
+                                Your food is... 
+                            </Typography>
+                            <Typography
+                                variant={mdBreakpoints ? "h3" : "h5"}
+                                sx={{
+                                    px: 5,
+                                    py: 2,
+                                    border: "2px dashed #000000",
+                                    borderRadius: 2.5,
+                                }}
+                            >
+                                {prediction.food}
+                            </Typography>
+                            <Typography
+                                variant={mdBreakpoints ? "h4" : "h6"}
+                            >
+                                Ingredients are...
+                            </Typography>
+                            <Stack
+                                spacing={1}
+                            >
+                            {prediction.ingredients[0].split(",").map(ingredient => (
+                                <Typography
+                                    variant={mdBreakpoints ? "h5" : "subtitle1"}
+                                    children={ingredient}
+                                    sx={{
+                                        px: 2.5,
+                                        py: 1,
+                                        border: "2px dashed #000000",
+                                        borderRadius: 2.5,
+                                    }}
+                                />
+                            ))}
+                            </Stack>
+                        </Stack>    
+                    ) : null
+                }
+                
                 <Stack
-                    ref={fileBoxRef}
-                    maxWidth={900}
-                    height={400}
-                    justifyContent={"center"}
+                    spacing={5}
                     alignItems={"center"}
-                    spacing={1.5}
+                    flexGrow={1}
                     sx={{
-                        border: "5px dashed #000000",
-                        cursor: "pointer",
-                        userSelect: "none",
-                        position: "relative",
                         mx: 5,
                     }}
-                    onClick={onFileUpload}
                 >
-                    <Box
-                        position={"absolute"}
-                        sx={{
-                            width: "100%",
-                            height: "100%",
-                            zIndex: 1,
-                        }}
-                        onDragEnter={handleDragEnter}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                    />
-                    <ImageIcon
-                        sx={{
-                            fontSize: 60,
-                        }}
-                    />
                     <Typography
-                        variant={"h6"}
+                        variant={mdBreakpoints ? "h2" : "h4"}
                     >
-                        <strong>
-                            Choose a image
-                        </strong>
-                        {" "}or drag it here.
+                        FSDL Food-telling
                     </Typography>
+                    <Stack
+                        ref={fileBoxRef}
+                        maxWidth={900}
+                        width={"100%"}
+                        height={400}
+                        justifyContent={"center"}
+                        alignItems={"center"}
+                        spacing={1.5}
+                        sx={{
+                            border: "5px dashed #000000",
+                            cursor: "pointer",
+                            userSelect: "none",
+                            position: "relative",
+                            mx: 5,
+                        }}
+                        onClick={onFileUpload}
+                    >
+                        <Box
+                            position={"absolute"}
+                            sx={{
+                                width: "100%",
+                                height: "100%",
+                                zIndex: 1,
+                            }}
+                            onDragEnter={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                        />
+                        <ImageIcon
+                            sx={{
+                                fontSize: 60,
+                            }}
+                        />
+                        <Typography
+                            variant={"h6"}
+                        >
+                            <strong>
+                                Choose a image
+                            </strong>
+                            {" "}or drag it here.
+                        </Typography>
+                    </Stack>
                 </Stack>
-            </Box>
+            </Stack>
             <input
                 ref={fileInputRef}
                 style={{
