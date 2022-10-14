@@ -2,6 +2,7 @@ import './App.css';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {MainTemplate} from "./pages/Main/MainTemplate";
 import {OutputTemplate} from "./pages/Output/OutputTemplate";
+import { createTheme, ThemeProvider } from '@mui/material';
 
 const Router = () => {
   return (
@@ -21,8 +22,12 @@ const Router = () => {
 }
 
 function App() {
+  const theme = createTheme();
+
   return (
-    <Router />
+    <ThemeProvider theme={theme}>
+      <Router />
+    </ThemeProvider>
   );
 }
 
