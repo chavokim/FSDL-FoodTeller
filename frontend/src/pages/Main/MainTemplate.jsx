@@ -1,5 +1,5 @@
 import React, {useRef, useState} from "react";
-import {Box, Stack, Typography, useMediaQuery} from "@mui/material";
+import {Box, Button, Stack, Typography, useMediaQuery} from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import {LoadingOverlay} from "../../common/LoadingOverlay";
 import AWS from 'aws-sdk'
@@ -21,6 +21,7 @@ const myBucket = new AWS.S3({
 
 export const MainTemplate = () => {
     const [prediction, setPrediction] = useState();
+    const [file, setFile] = useState();
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef();
     const fileBoxRef = useRef();
@@ -62,20 +63,25 @@ export const MainTemplate = () => {
         fileBoxRef.current.style.opacity = 1;
     }
 
-    const uploadFileToS3 = (file) => {
+    const uploadFileToS3 = (file, isIncorrect) => {
+        setLoading(true);
         const params = {
             ACL: 'public-read',
             Body: file,
             Bucket: S3_BUCKET,
-            Key: file.name
+            Key: isIncorrect ? `incorrect/${file.name}` : file.name
         };
 
         myBucket.putObject(params, function(err, data) {
+            setLoading(false);
             if (err) {
                 return alert("There was an error creating your album: " + err.message);
             }
-            setLoading(false);
         })
+
+        if(isIncorrect) {
+            alert("This result is reported as incorrect one");
+        }
     }
 
     const getBase64 = file => {
@@ -121,14 +127,13 @@ export const MainTemplate = () => {
     const uploadFile = newFile => {
         setLoading(true);
         getPrediction(newFile);
-        uploadFileToS3(newFile);
+        uploadFileToS3(newFile, false);
+        setFile(newFile);
     }
     
     return (
         <Stack
             height={"100vh"}
-            justifyContent={"center"}
-            alignItems={"center"}
         >
             <LoadingOverlay 
                 active={loading}
@@ -185,6 +190,18 @@ export const MainTemplate = () => {
                                 />
                             ))}
                             </Stack>
+                            <Typography
+                                variant={mdBreakpoints ? "h4" : "h6"}
+                            >
+                                If upper result is incorrect, click below button
+                            </Typography>
+                            <Button
+                                onClick={() => uploadFileToS3(file, true)}
+                                variant={"contained"}
+                                color={"error"}
+                            >
+                                incorrect
+                            </Button>
                         </Stack>    
                     ) : null
                 }
