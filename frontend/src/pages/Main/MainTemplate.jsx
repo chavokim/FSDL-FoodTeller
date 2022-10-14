@@ -108,21 +108,19 @@ export const MainTemplate = () => {
       };
 
     const getPrediction = (newFile) => {
-        // getBase64(newFile).then(async result => {
-        //     const response = await axios.post(
-        //         "https://3r0hzkix91.execute-api.ap-southeast-1.amazonaws.com/Prod/classify_food",
-        //         result,
-        //         {
-        //             headers: {
-        //                 "Content-Type": "raw",
-        //                 "Access-Control-Allow-Origin" : "*"
-        //             },
-        //         }
-        //     ).then(resp => {
-        //         setSearchParams({food: "hi", ingredients: ["h", "tomo", "potato"]});
-        //     })
-        // })
-        setSearchParams({food: "hi", ingredients: ["h", "tomo", "potato"]});
+         getBase64(newFile).then(async result => {
+             const response = await axios.post(
+                 "https://3r0hzkix91.execute-api.ap-southeast-1.amazonaws.com/Prod/classify_food",
+                 result,
+                 {
+                    headers: 
+                         "Access-Control-Allow-Origin" : "*"
+                    },
+                 }
+             ).then(resp => {
+                 setSearchParams({food: "hi", ingredients: ["h", "tomo", "potato"]});
+             })
+         })
     }
     
     const uploadFile = newFile => {
