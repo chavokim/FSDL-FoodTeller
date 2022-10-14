@@ -1,9 +1,10 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Box, Stack, Typography, useMediaQuery} from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import {LoadingOverlay} from "../../common/LoadingOverlay";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import AWS from 'aws-sdk'
+import axios from "axios";
 
 const S3_BUCKET ='fsdl-foodwise';
 const REGION ='ap-northeast-2';
@@ -20,12 +21,16 @@ const myBucket = new AWS.S3({
 })
 
 export const MainTemplate = () => {
-    const [file, setFile] = useState();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef();
     const fileBoxRef = useRef();
 
     const mdBreakpoints = useMediaQuery(theme => theme.breakpoints.up("md"));
+
+    useEffect(() => {
+        console.log(searchParams);
+    }, [searchParams])
     
     const navigate = useNavigate();
     
@@ -73,22 +78,58 @@ export const MainTemplate = () => {
         };
 
         myBucket.putObject(params, function(err, data) {
-            setLoading(false);
-            navigate("/output");
             if (err) {
-              return alert("There was an error creating your album: " + err.message);
+                return alert("There was an error creating your album: " + err.message);
             }
-          })
+            setLoading(false);
+        })
+    }
+
+    const getBase64 = file => {
+        return new Promise(resolve => {
+          let fileInfo;
+          let baseURL = "";
+          // Make new FileReader
+          let reader = new FileReader();
+    
+          // Convert the file to base64 text
+          reader.readAsDataURL(file);
+    
+          // on reader load somthing...
+          reader.onload = () => {
+            // Make a fileInfo Object
+            console.log("Called", reader);
+            baseURL = reader.result;
+            console.log(baseURL);
+            resolve(baseURL);
+          };
+          console.log(fileInfo);
+        });
+      };
+
+    const getPrediction = (newFile) => {
+        // getBase64(newFile).then(async result => {
+        //     const response = await axios.post(
+        //         "https://3r0hzkix91.execute-api.ap-southeast-1.amazonaws.com/Prod/classify_food",
+        //         result,
+        //         {
+        //             headers: {
+        //                 "Content-Type": "raw",
+        //                 "Access-Control-Allow-Origin" : "*"
+        //             },
+        //         }
+        //     ).then(resp => {
+        //         setSearchParams({food: "hi", ingredients: ["h", "tomo", "potato"]});
+        //     })
+        // })
+        setSearchParams({food: "hi", ingredients: ["h", "tomo", "potato"]});
     }
     
     const uploadFile = newFile => {
         setLoading(true);
-        setFile(newFile);
+        getPrediction(newFile);
         uploadFileToS3(newFile);
     }
-
-    console.log(process.env.REACT_APP_ACCESS_KEY_ID)
-    console.log(process.env.REACT_APP_SECRET_ACCESS_KEY)
     
     return (
         <Stack
