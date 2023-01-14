@@ -23,7 +23,7 @@ Email: carlo12david@gmail.com <br/>
 Github: https://github.com/carlodavid012 <br/>
 
 ### Chavo Kim
-Email: carlo12david@gmail.com <br/>
+Email: treeboy0384@gmail.com <br/>
 Github: https://github.com/chavokim <br/>
 
 ### George Loh
